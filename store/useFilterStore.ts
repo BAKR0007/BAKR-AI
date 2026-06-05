@@ -1,21 +1,32 @@
 import { create } from 'zustand'
 
-interface FilterState {
+export interface FilterState {
   q: string
   category: string[]
   pricing: string[]
   sort: string
   page: number
-  setFilter: (key: keyof Omit<FilterState, 'setFilter' | 'reset'>, value: any) => void
+  setFilter: {
+    (key: 'q' | 'sort', value: string): void
+    (key: 'category' | 'pricing', value: string[]): void
+    (key: 'page', value: number): void
+  }
   reset: () => void
 }
 
-export const useFilterStore = create<FilterState>((set) => ({
+const defaultState = {
   q: '',
-  category: [],
-  pricing: [],
+  category: [] as string[],
+  pricing: [] as string[],
   sort: 'newest',
   page: 1,
-  setFilter: (key, value) => set((state) => ({ ...state, [key]: value, page: key !== 'page' ? 1 : value })),
-  reset: () => set({ q: '', category: [], pricing: [], sort: 'newest', page: 1 }),
+}
+
+export const useFilterStore = create<FilterState>((set) => ({
+  ...defaultState,
+
+  setFilter: (key: string, value: string | string[] | number) =>
+    set((state) => ({ ...state, [key]: value })),
+
+  reset: () => set({ ...defaultState }),
 }))
