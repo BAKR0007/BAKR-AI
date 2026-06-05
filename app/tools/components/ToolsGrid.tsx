@@ -1,4 +1,4 @@
-import { useFilterStore } from '@/store/useFilterStore'
+import { useFilterStore } from '../../../store/useFilterStore'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { SearchX, Bookmark, Star, Eye } from 'lucide-react'
