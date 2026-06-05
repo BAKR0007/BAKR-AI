@@ -1,4 +1,4 @@
-import { useFilterStore } from '../../../store/useFilterStore'
+import { useFilterStore } from '@/store/useFilterStore'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 
@@ -15,15 +15,19 @@ export function FiltersSidebar() {
   const { category, pricing, setFilter } = useFilterStore()
 
   const handleCategoryChange = (id: string, checked: boolean) => {
-    if (checked) setFilter('category', [...category, id])
-    // تم التعديل هنا: إضافة نوع string للمتغير c
-    else setFilter('category', category.filter((c: string) => c !== id))
+    if (checked) {
+      setFilter('category', [...category, id])
+    } else {
+      setFilter('category', category.filter((c: string) => c !== id))
+    }
   }
 
   const handlePricingChange = (id: string, checked: boolean) => {
-    if (checked) setFilter('pricing', [...pricing, id])
-    // تم التعديل هنا: إضافة نوع string للمتغير p
-    else setFilter('pricing', pricing.filter((p: string) => p !== id))
+    if (checked) {
+      setFilter('pricing', [...pricing, id])
+    } else {
+      setFilter('pricing', pricing.filter((p: string) => p !== id))
+    }
   }
 
   return (
