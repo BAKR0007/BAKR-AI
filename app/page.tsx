@@ -1,6 +1,6 @@
-import { ToolCard } from '@/components/ToolCard';
+import { ToolCard } from './components/ToolCard'; 
 import { prisma } from '@/lib/prisma';
-import FeaturedTools from '@/components/FeaturedTools'; // مكون الإعلانات الخاص بك
+import FeaturedTools from '@/components/FeaturedTools'; 
 import { HeroSection, StatsBar, TopRatedToolsSlider, CategoriesGrid, NewsletterCTA } from './components/home/HomeSections';
 
 export default async function Home() {
@@ -20,10 +20,10 @@ export default async function Home() {
       <StatsBar />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
-        {/* 3. بانر الإعلانات (مكونك القديم) */}
+        {/* 3. بانر الإعلانات */}
         <FeaturedTools position="HOMEPAGE_HERO" />
 
-        {/* 4. شريط تمرير أفقي لأفضل الأدوات مقترحة */}
+        {/* 4. شريط تمرير أفقي لأفضل الأدوات */}
         {tools.length > 0 && <TopRatedToolsSlider tools={tools} />}
 
         {/* 5. شبكة أحدث الأدوات المضافة */}
@@ -39,8 +39,9 @@ export default async function Home() {
                 tool={{
                   id: tool.id,
                   name: tool.name || "بدون اسم",
-                  slug: tool.slug || "", // 👈 التعديل السحري هنا! تمرير الـ slug للبطاقة لتعرف مسار الصفحة
-                  description: tool.description || "" 
+                  slug: tool.slug || "", 
+                  description: tool.description || "",
+                  image_url: tool.image_url || undefined // 👈 تمرير الصورة للبطاقة لتُعالج عبر الـ Proxy
                 }} 
               />
             ))}

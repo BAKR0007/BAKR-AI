@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // ✅ يحل مشكلة MetadataWrapper hydration في Next.js 16
+    optimizePackageImports: ['swiper', 'framer-motion', 'lucide-react'],
+  },
   images: {
     remotePatterns: [
       {
