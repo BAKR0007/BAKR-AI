@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Sparkles, Zap } from 'lucide-react';
+import { Sparkles, Zap, Info } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { prisma } from '@/lib/prisma';
@@ -44,6 +44,9 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
     ?.replace(/🌐?\s*(الرابط|Link):\s*\[?https?:\/\/[^\s\]]+\]?/g, '')
     ?.replace(/https?:\/\/[^\s]+/g, '') || 'لا يوجد وصف تفصيلي متاح لهذه الأداة.';
 
+  // 💡 خوارزمية ذكية: هل الوصف منسق بالذكاء الاصطناعي؟ (يحتوي على عناوين ###)
+  const isEnriched = sanitizedDescription.includes('###');
+
   return (
     <div className="min-h-screen bg-[#020817] text-slate-50 font-sans selection:bg-emerald-500/30">
       {/* شريط الخصم */}
@@ -63,6 +66,7 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
               fill 
               sizes="(max-width: 768px) 112px, 144px"
               className="object-cover" 
+              unoptimized
             />
           </div>
           
@@ -73,8 +77,7 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
             <ToolActions />
             
             <div className="pt-4">
-              {/* التعديل هنا: الرابط يوجه الآن إلى مسار الـ API الصحيح */}
-              <Button asChild className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-extrabold px-8 h-14 rounded-xl w-full md:w-auto text-lg">
+              <Button asChild className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-extrabold px-8 h-14 rounded-xl w-full md:w-auto text-lg hover:shadow-[0_0_20px_rgba(251,191,36,0.4)] transition-all">
                 <Link href={`/api/go/${tool.slug}`} target="_blank" rel="noopener noreferrer">
                   <Zap className="w-5 h-5 ml-2" />
                   تفعيل الخصم والحصول على الأداة
@@ -90,14 +93,23 @@ export default async function ToolDetailPage({ params }: { params: Promise<{ slu
             <h2 className="text-3xl font-bold">نظرة تفصيلية</h2>
           </div>
           
-          <div className="w-full text-right leading-loose" dir="rtl">
-            <ReactMarkdown
-              components={{
-                a: ({children}) => <span className="hidden">{children}</span>,
-              }}
-            >
-              {sanitizedDescription}
-            </ReactMarkdown>
+          {/* 💡 إذا كان معالجاً بالـ AI يعرضه بشكله الطبيعي، وإذا كان نصاً عادياً يضعه في بطاقة فخمة */}
+          <div className={`w-full text-right leading-loose ${!isEnriched ? 'bg-slate-800/40 p-8 rounded-2xl border border-slate-700/50 shadow-inner text-lg text-slate-300 flex items-start gap-4' : ''}`} dir="rtl">
+            
+            {!isEnriched && (
+              <Info className="w-8 h-8 text-slate-500 shrink-0 mt-1" />
+            )}
+
+            <div className={!isEnriched ? "flex-1" : ""}>
+              <ReactMarkdown
+                components={{
+                  a: ({children}) => <span className="hidden">{children}</span>,
+                }}
+              >
+                {sanitizedDescription}
+              </ReactMarkdown>
+            </div>
+
           </div>
         </section>
       </main>

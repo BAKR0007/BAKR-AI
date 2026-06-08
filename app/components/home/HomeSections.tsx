@@ -121,13 +121,11 @@ export function TopRatedToolsSlider({ tools }: { tools: any[] }) {
   const sliderRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  // 💡 محرك السلايدر التلقائي السحري
   useEffect(() => {
     let animationFrameId: number;
     const scroll = () => {
       if (sliderRef.current && !isHovered) {
-        sliderRef.current.scrollLeft += 1; // سرعة التمرير (يمكنك زيادتها)
-        // عند الوصول لنهاية الشريط، نعود للبداية ليعطي تأثيراً لا نهائياً
+        sliderRef.current.scrollLeft += 1;
         if (sliderRef.current.scrollLeft >= (sliderRef.current.scrollWidth - sliderRef.current.clientWidth)) {
           sliderRef.current.scrollLeft = 0;
         }
@@ -135,13 +133,10 @@ export function TopRatedToolsSlider({ tools }: { tools: any[] }) {
       animationFrameId = requestAnimationFrame(scroll);
     };
     animationFrameId = requestAnimationFrame(scroll);
-    
     return () => cancelAnimationFrame(animationFrameId);
   }, [isHovered]);
 
   if (!tools || tools.length === 0) return null;
-
-  // 💡 نضاعف الأدوات لضمان شريط تمرير لا يتوقف أبداً
   const infiniteTools = [...tools, ...tools, ...tools];
 
   return (
@@ -155,26 +150,24 @@ export function TopRatedToolsSlider({ tools }: { tools: any[] }) {
         </div>
       </div>
       
-      {/* حاوية الشريط الممرر */}
       <div 
         ref={sliderRef}
-        onMouseEnter={() => setIsHovered(true)} // إيقاف عند تمرير الماوس
-        onMouseLeave={() => setIsHovered(false)} // استئناف الحركة
+        onMouseEnter={() => setIsHovered(true)} 
+        onMouseLeave={() => setIsHovered(false)} 
         className="flex overflow-x-auto py-16 px-4 gap-8 w-full [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing" 
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {infiniteTools.map((tool, idx) => (
-          // البطاقة هنا نسخة طبق الأصل من ToolCard
           <div key={`${tool.id}-${idx}`} className="shrink-0 w-[320px] relative group h-full">
             
-            {/* الهالة الضوئية السحرية */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"></div>
+            {/* 🌟 التعديل هنا: زيادة قوة الوهج ومساحته (opacity-60 و -inset-2) */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-600 rounded-2xl blur-xl opacity-0 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none"></div>
 
             <Link href={`/tools/${tool.slug || tool.id}`} className="block relative z-10 h-full outline-none">
-              <div className="border border-transparent rounded-2xl p-6 bg-gray-950 shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400 flex flex-col justify-between h-[360px]">
+              {/* 🌟 التعديل هنا: جعل لون البطاقة أسود داكن جداً (bg-[#050505]) ليعكس الوهج */}
+              <div className="border border-transparent rounded-2xl p-6 bg-[#050505] shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400 flex flex-col justify-between h-[360px]">
                 
                 <div className="flex flex-col items-center text-center mb-6">
-                  {/* الأيقونة المربعة الدائرية المضيئة */}
                   <div className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center bg-gray-900 border border-amber-300/30 text-amber-300 text-3xl font-bold mb-5 shadow-[0_0_15px_rgba(251,191,36,0.2)] relative">
                     <SliderImage src={tool.image_url} alt={tool.name} />
                   </div>
@@ -216,14 +209,34 @@ export function CategoriesGrid() {
           {categories.map((cat, idx) => {
             const Icon = cat.icon
             return (
-              <motion.div key={cat.name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }} viewport={{ once: true }}>
-                <Card className="bg-[#1a103c]/30 backdrop-blur-sm border-indigo-500/20 hover:border-amber-400/50 hover:bg-[#1a103c]/60 hover:shadow-[0_10px_30px_rgba(251,191,36,0.1)] transition-all duration-300 cursor-pointer text-center group">
+              <motion.div 
+                key={cat.name} 
+                initial={{ opacity: 0, scale: 0.9 }} 
+                whileInView={{ opacity: 1, scale: 1 }} 
+                transition={{ delay: idx * 0.05 }} 
+                viewport={{ once: true }}
+              >
+                <Card 
+                  className={`bg-[#1a103c]/30 backdrop-blur-sm border-indigo-500/20 
+                    hover:border-amber-400/50 hover:bg-[#1a103c]/60 
+                    hover:shadow-[0_10px_30px_rgba(251,191,36,0.1)] 
+                    transition-all duration-300 cursor-pointer text-center group`}
+                >
                   <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
-                    <div className="p-4 bg-indigo-950/50 rounded-2xl text-indigo-300 group-hover:bg-amber-400/10 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-300 border border-indigo-500/20 group-hover:border-amber-400/30">
+                    <div 
+                      className={`p-4 bg-indigo-950/50 rounded-2xl text-indigo-300 
+                        group-hover:bg-amber-400/10 group-hover:text-amber-400 
+                        group-hover:scale-110 transition-all duration-300 border 
+                        border-indigo-500/20 group-hover:border-amber-400/30`}
+                    >
                       <Icon className="w-7 h-7" />
                     </div>
-                    <h3 className="font-bold text-sm text-indigo-50 group-hover:text-white transition-colors">{cat.name}</h3>
-                    <p className="text-xs text-indigo-300/60 bg-indigo-950/50 px-3 py-1 rounded-full">{cat.count} أداة</p>
+                    <h3 className="font-bold text-sm text-indigo-50 group-hover:text-white transition-colors">
+                      {cat.name}
+                    </h3>
+                    <p className="text-xs text-indigo-300/60 bg-indigo-950/50 px-3 py-1 rounded-full">
+                      {cat.count} أداة
+                    </p>
                   </CardContent>
                 </Card>
               </motion.div>
