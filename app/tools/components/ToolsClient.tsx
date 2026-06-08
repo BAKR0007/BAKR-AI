@@ -13,22 +13,31 @@ import { X, Search } from 'lucide-react'
 
 interface InitialParams {
   q?: string
+  search?: string // لدعم الكلمة القادمة من الصفحة الرئيسية
   category?: string
   pricing?: string
   sort?: string
   page?: string
 }
 
-export function ToolsClient({ initialParams }: { initialParams: InitialParams }) {
+interface ToolsClientProps {
+  initialParams: InitialParams
+  initialTools?: any[] 
+}
+
+export function ToolsClient({ initialParams, initialTools }: ToolsClientProps) {
   const router = useRouter()
   const pathname = usePathname()
 
   const { q, category, pricing, sort, page, setFilter, reset } = useFilterStore()
-  const [searchValue, setSearchValue] = useState(initialParams.q ?? '')
+  
+  // نتحقق أولاً إن كانت الكلمة قادمة باسم q أو باسم search
+  const incomingSearch = initialParams.q || initialParams.search || ''
+  const [searchValue, setSearchValue] = useState(incomingSearch)
 
   // تهيئة الفلاتر من URL عند أول تحميل
   useEffect(() => {
-    if (initialParams.q)        setFilter('q', initialParams.q)
+    if (incomingSearch)         setFilter('q', incomingSearch) // سيتم تخزينها في الـ store كـ q مباشرة
     if (initialParams.category) setFilter('category', initialParams.category.split(','))
     if (initialParams.pricing)  setFilter('pricing', initialParams.pricing.split(','))
     if (initialParams.sort)     setFilter('sort', initialParams.sort)
@@ -38,7 +47,7 @@ export function ToolsClient({ initialParams }: { initialParams: InitialParams })
   // تحديث URL عند تغيير الفلاتر
   useEffect(() => {
     const params = new URLSearchParams()
-    if (q)               params.set('q', q)
+    if (q)                 params.set('q', q) // سيحافظ النظام على استخدام q في صفحة الأدوات
     if (category.length) params.set('category', category.join(','))
     if (pricing.length)  params.set('pricing', pricing.join(','))
     if (sort !== 'newest') params.set('sort', sort)
@@ -119,7 +128,8 @@ export function ToolsClient({ initialParams }: { initialParams: InitialParams })
           </div>
         )}
 
-        <ToolsGrid />
+        {/* 🔥 تم التحديث هنا بنجاح وتمرير البيانات الحقيقية من السيرفر */}
+        <ToolsGrid tools={initialTools} />
 
       </main>
     </>
