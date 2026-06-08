@@ -33,34 +33,66 @@ export function ToolsGrid({ tools = [] }: ToolsGridProps) {
     <div className="space-y-8 w-full p-6 bg-[#020817] rounded-3xl border border-slate-800/60 shadow-inner">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool: any) => {
-          // دمج ذكي لدعم مسار الصورة سواء جاءت camelCase أو snake_case من الـ API
-          const currentImageUrl = tool.imageUrl || tool.image_url;
+          
+          // 1️⃣ دعم كافة المسميات المحتملة للحقل في قاعدة البيانات (imageUrl أو image_url أو image)
+          const rawImageUrl = tool.imageUrl || tool.image_url || tool.image;
+          let cleanImageUrl = '';
+
+          // 2️⃣ تنظيف المسار تلقائياً لحل مشاكل الويندوز ومجلد public
+          if (rawImageUrl && typeof rawImageUrl === 'string') {
+            cleanImageUrl = rawImageUrl
+              .replace(/^public[\/\\]/, '/') // إزالة كلمة public من البداية لأن Next.js يقرأ المجلد العام مباشرة
+              .replace(/\\/g, '/');          // تحويل الـ backslashes (\) الخاصة بالويندوز إلى (/) المتوافقة مع المتصفح
+          }
+
+          // استخراج أول حرفين من اسم الأداة كبديل فخم في حال فشل الصورة
+          const fallbackText = tool.name ? tool.name.substring(0, 2).toUpperCase() : 'AI';
 
           return (
             <Link key={tool.id} href={`/tools/${tool.slug || tool.id}`} className="block relative group">
               
-              {/* تأثير الوهج الخارجي الفخم عند حوم الماوس (Hover) */}
+              {/* تأثير الوهج الخارجي الفخم */}
               <div className="absolute -inset-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-600 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-300 pointer-events-none"></div>
 
-              {/* بطاقة الأداة بتصميم زجاجي داكن وتأثيرات تفاعلية */}
+              {/* بطاقة الأداة الزجاجية */}
               <Card className="flex flex-col h-[360px] relative z-10 overflow-hidden bg-[#0a0514]/90 backdrop-blur-xl border border-slate-800 rounded-3xl transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400">
                 
-                {/* إضاءة داخلية علوية ناعمة تظهر عند الـ Hover */}
                 <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                 <CardContent className="p-6 flex-1 flex flex-col gap-4 relative z-10 text-right" dir="rtl">
                   <div className="flex justify-between items-start">
                     
-                    {/* مربع شعار الأداة */}
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center bg-slate-950 border border-slate-800 group-hover:border-amber-400/50 text-amber-300 text-3xl font-bold shadow-lg transition-colors">
-                      {currentImageUrl ? (
-                        <img src={currentImageUrl} alt={tool.name} className="w-full h-full object-cover" />
+                    {/* 3️⃣ مربع شعار الأداة الذكي والمحمي من الكسر */}
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center bg-slate-950 border border-slate-800 group-hover:border-amber-400/50 text-amber-300 text-2xl font-bold shadow-lg transition-colors relative">
+                      {cleanImageUrl ? (
+                        <>
+                          <img 
+                            src={cleanImageUrl} 
+                            alt={tool.name} 
+                            className="w-full h-full object-cover" 
+                            onError={(e) => {
+                              // 🔥 خطة الدفاع الجوي: إذا فشل تحميل الصورة، اخفها واظهر الحروف البديلة فوراً
+                              e.currentTarget.style.display = 'none';
+                              const fallbackDiv = e.currentTarget.nextElementSibling as HTMLElement;
+                              if (fallbackDiv) fallbackDiv.style.display = 'flex';
+                            }}
+                          />
+                          {/* هذا الـ Div يكون مخفياً ويظهر فقط كـ البديل الاحترافي إذا انكسرت الصورة */}
+                          <div 
+                            className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-950 text-amber-400 font-extrabold text-xl tracking-wider select-none"
+                            style={{ display: 'none' }}
+                          >
+                            {fallbackText}
+                          </div>
+                        </>
                       ) : (
-                        <span>AI</span>
+                        <span className="bg-gradient-to-br from-slate-900 to-slate-950 w-full h-full flex items-center justify-center text-amber-400 font-extrabold text-xl tracking-wider">
+                          {fallbackText}
+                        </span>
                       )}
                     </div>
 
-                    {/* زر المفضلة - مع منع انتشار الحدث (Propagation) لكي لا يفتح الرابط عند الضغط عليه */}
+                    {/* زر الحفظ المفضلة */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -74,7 +106,7 @@ export function ToolsGrid({ tools = [] }: ToolsGridProps) {
                     </Button>
                   </div>
                   
-                  {/* نصوص كرت الأداة */}
+                  {/* النصوص */}
                   <div>
                     <h4 className="font-extrabold text-xl line-clamp-1 text-slate-50 group-hover:text-amber-400 transition-colors">
                       {tool.name}
@@ -84,7 +116,7 @@ export function ToolsGrid({ tools = [] }: ToolsGridProps) {
                     </p>
                   </div>
 
-                  {/* وسوم التصنيف والأسعار */}
+                  {/* الوسوم */}
                   <div className="flex flex-wrap gap-2.5 mt-auto pt-3 border-t border-slate-800/80">
                     {tool.category && (
                       <Badge variant="outline" className="text-slate-400 border-slate-700">
@@ -98,7 +130,7 @@ export function ToolsGrid({ tools = [] }: ToolsGridProps) {
                     )}
                   </div>
 
-                  {/* التقييم والمشاهدات أسفل الكرت */}
+                  {/* معلومات التفاعل */}
                   <div className="flex items-center justify-between text-sm text-slate-400 pt-3">
                     <div className="flex items-center gap-1.5">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
