@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Search, ArrowLeft, Star, Code, Video, PenTool, Megaphone, MonitorPlay, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation' 
 
 // --- بيانات الأقسام ---
 const categories = [
@@ -27,12 +27,12 @@ const fadeIn = {
   transition: { duration: 0.5 }
 }
 
-// 💡 مكون ذكي للتعامل مع الصور المكسورة في الشريط الممرر
+// 💡 المكون الذكي للتعامل مع الصور (مطابق لـ ToolCard)
 function SliderImage({ src, alt }: { src: string; alt: string }) {
   const [imgError, setImgError] = useState(false);
   
   if (!src || imgError) {
-    return <span className="text-amber-400 text-2xl font-bold">AI</span>;
+    return <span>AI</span>;
   }
   
   return (
@@ -50,58 +50,42 @@ function SliderImage({ src, alt }: { src: string; alt: string }) {
 // --- الأقسام ---
 
 export function HeroSection() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/tools?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
   return (
     <section className="relative pt-24 pb-16 md:pt-40 md:pb-24 overflow-hidden bg-gradient-to-b from-[#090514] via-[#160a35] to-[#0f0c29] border-b border-indigo-900/50">
       <div className="container px-4 mx-auto text-center z-10 relative">
-        
-        <motion.div 
-          className="flex justify-center mb-8"
-          initial={{ opacity: 0, scale: 0.8 }} 
-          animate={{ opacity: 1, scale: 1 }} 
-          transition={{ duration: 0.5 }}
-        >
-          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-amber-400/50 shadow-[0_0_50px_rgba(251,191,36,0.3)] group hover:shadow-[0_0_80px_rgba(251,191,36,0.5)] transition-all duration-500">
-            <Image 
-              src="/logo.png" 
-              alt="BAKR AI Logo" 
-              fill 
-              sizes="(max-width: 768px) 128px, 160px"
-              className="object-cover group-hover:scale-110 transition-transform duration-700"
-              priority 
-            />
+        <motion.div className="flex justify-center mb-8" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-amber-400/50 shadow-[0_0_50px_rgba(251,191,36,0.3)] hover:shadow-[0_0_80px_rgba(251,191,36,0.5)] transition-all duration-500">
+            <Image src="/logo.png" alt="BAKR AI Logo" fill sizes="(max-width: 768px) 128px, 160px" className="object-cover hover:scale-110 transition-transform duration-700" priority />
           </div>
         </motion.div>
 
-        <motion.h1 
-          className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white drop-shadow-lg"
-          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        >
+        <motion.h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 text-white drop-shadow-lg" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           مرحباً بك في <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-600 drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]">BAKR AI</span>
         </motion.h1>
-        <motion.p 
-          className="text-lg md:text-xl text-indigo-200/80 mb-10 max-w-2xl mx-auto leading-relaxed"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-        >
+        
+        <motion.p className="text-lg md:text-xl text-indigo-200/80 mb-10 max-w-2xl mx-auto leading-relaxed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
           دليلك الشامل لاستكشاف أقوى أدوات الذكاء الاصطناعي لتطوير أعمالك، تحسين تصميماتك، ومضاعفة إنتاجيتك في عالم سحري.
         </motion.p>
         
-        <motion.div 
-          className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3"
-          initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}
-        >
+        <motion.form onSubmit={handleSearch} className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }}>
           <div className="relative flex-1">
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 h-5 w-5" />
-            <Input 
-              type="text" 
-              placeholder="ابحث عن الأدوات، الأقسام، أو الكلمات المفتاحية..." 
-              className="pr-12 pl-4 h-14 w-full text-lg rounded-full bg-white/5 backdrop-blur-md border-indigo-500/30 text-white placeholder:text-indigo-300/50 focus-visible:ring-amber-500 shadow-inner"
-              dir="rtl"
-            />
+            <Input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="ابحث عن الأدوات، الأقسام، أو الكلمات المفتاحية..." className="pr-12 pl-4 h-14 w-full text-lg rounded-full bg-white/5 backdrop-blur-md border-indigo-500/30 text-white placeholder:text-indigo-300/50 focus-visible:ring-amber-500 shadow-inner" dir="rtl" />
           </div>
-          <Button size="lg" className="h-14 rounded-full px-8 text-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold border-0 shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] transition-all">
+          <Button type="submit" size="lg" className="h-14 rounded-full px-8 text-lg bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold border-0 shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] transition-all">
             استكشف الأدوات
           </Button>
-        </motion.div>
+        </motion.form>
       </div>
       
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px] -z-10 pointer-events-none"></div>
@@ -134,11 +118,35 @@ export function StatsBar() {
 }
 
 export function TopRatedToolsSlider({ tools }: { tools: any[] }) {
+  const sliderRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // 💡 محرك السلايدر التلقائي السحري
+  useEffect(() => {
+    let animationFrameId: number;
+    const scroll = () => {
+      if (sliderRef.current && !isHovered) {
+        sliderRef.current.scrollLeft += 1; // سرعة التمرير (يمكنك زيادتها)
+        // عند الوصول لنهاية الشريط، نعود للبداية ليعطي تأثيراً لا نهائياً
+        if (sliderRef.current.scrollLeft >= (sliderRef.current.scrollWidth - sliderRef.current.clientWidth)) {
+          sliderRef.current.scrollLeft = 0;
+        }
+      }
+      animationFrameId = requestAnimationFrame(scroll);
+    };
+    animationFrameId = requestAnimationFrame(scroll);
+    
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isHovered]);
+
   if (!tools || tools.length === 0) return null;
 
+  // 💡 نضاعف الأدوات لضمان شريط تمرير لا يتوقف أبداً
+  const infiniteTools = [...tools, ...tools, ...tools];
+
   return (
-    <section className="py-16 bg-gradient-to-b from-[#0f0c29] to-[#120b2e]">
-      <div className="flex justify-between items-end mb-8 px-4 max-w-7xl mx-auto">
+    <section className="py-16 bg-gradient-to-b from-[#0f0c29] to-[#120b2e] overflow-hidden">
+      <div className="flex justify-between items-end mb-4 px-4 max-w-7xl mx-auto relative z-20">
         <div>
           <h2 className="text-3xl font-extrabold mb-2 text-white flex items-center gap-2">
             <Sparkles className="text-amber-400 w-6 h-6" /> أدوات مميزة ومقترحة
@@ -147,50 +155,48 @@ export function TopRatedToolsSlider({ tools }: { tools: any[] }) {
         </div>
       </div>
       
-      <div className="flex overflow-x-auto pb-12 pt-4 px-4 max-w-7xl mx-auto gap-8 hide-scrollbar snap-x" style={{ scrollbarWidth: 'none' }}>
-        {tools.slice(0, 8).map((tool, idx) => (
-          <motion.div 
-            key={tool.id} 
-            className="snap-start shrink-0 w-[320px] relative group" // ✨ السحر يبدأ من هنا
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ delay: idx * 0.1 }}
-            viewport={{ once: true }}
-          >
-            {/* 🌟 التأثير السحري: الهالة الضوئية خلف البطاقة */}
+      {/* حاوية الشريط الممرر */}
+      <div 
+        ref={sliderRef}
+        onMouseEnter={() => setIsHovered(true)} // إيقاف عند تمرير الماوس
+        onMouseLeave={() => setIsHovered(false)} // استئناف الحركة
+        className="flex overflow-x-auto py-16 px-4 gap-8 w-full [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing" 
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {infiniteTools.map((tool, idx) => (
+          // البطاقة هنا نسخة طبق الأصل من ToolCard
+          <div key={`${tool.id}-${idx}`} className="shrink-0 w-[320px] relative group h-full">
+            
+            {/* الهالة الضوئية السحرية */}
             <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"></div>
 
-            <Link href={`/tools/${tool.slug || tool.id}`} className="block h-full outline-none relative z-10">
-              <Card className="hover:scale-105 hover:border-amber-400 transition-all duration-300 cursor-pointer h-full bg-[#0a0a0a] border-transparent shadow-2xl flex flex-col justify-between p-6 rounded-2xl">
+            <Link href={`/tools/${tool.slug || tool.id}`} className="block relative z-10 h-full outline-none">
+              <div className="border border-transparent rounded-2xl p-6 bg-gray-950 shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:border-amber-400 flex flex-col justify-between h-[360px]">
                 
-                <CardContent className="p-0 relative z-10 flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-6">
-                    {/* مربع الصورة مع توهج ذهبي خفيف */}
-                    <div className="w-16 h-16 relative rounded-full overflow-hidden bg-gray-900 border border-amber-300/30 flex items-center justify-center shadow-[0_0_15px_rgba(251,191,36,0.2)]">
-                      <SliderImage src={tool.image_url} alt={tool.name} />
-                    </div>
-                    <Badge className="bg-indigo-900/60 text-indigo-200 hover:bg-indigo-800 border border-indigo-500/30 backdrop-blur-sm shadow-sm">
-                      {tool.pricing_type || 'مدفوع'}
-                    </Badge>
+                <div className="flex flex-col items-center text-center mb-6">
+                  {/* الأيقونة المربعة الدائرية المضيئة */}
+                  <div className="w-20 h-20 rounded-xl overflow-hidden flex items-center justify-center bg-gray-900 border border-amber-300/30 text-amber-300 text-3xl font-bold mb-5 shadow-[0_0_15px_rgba(251,191,36,0.2)] relative">
+                    <SliderImage src={tool.image_url} alt={tool.name} />
                   </div>
                   
-                  <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-amber-400 transition-colors duration-300">{tool.name}</h3>
+                  <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-amber-400 transition-colors duration-300">
+                    {tool.name}
+                  </h3>
                   
-                  <p className="text-gray-300 text-base line-clamp-3 leading-relaxed mb-6" dir="auto">
-                    {tool.description || 'وصف الأداة غير متوفر حالياً. استكشف المزيد من التفاصيل بالداخل.'}
+                  <p className="text-gray-300 text-base line-clamp-3 leading-relaxed">
+                    {tool.description || 'وصف الأداة غير متوفر حالياً.'}
                   </p>
-                  
-                  {/* الزر الذهبي العريض في الأسفل ليتطابق مع أحدث الأدوات */}
-                  <div className="relative z-10 mt-auto w-full">
-                    <div className="block w-full text-center bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-gray-950 font-extrabold text-lg py-3 px-6 rounded-xl transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(251,191,36,0.4)]">
-                      قراءة التفاصيل
-                    </div>
+                </div>
+                
+                <div className="relative z-10 mt-auto w-full">
+                  <div className="block w-full text-center bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 group-hover:from-amber-600 group-hover:to-amber-500 text-gray-950 font-extrabold text-lg py-3 px-6 rounded-xl transition-all duration-300 shadow-md group-hover:shadow-[0_0_20px_rgba(251,191,36,0.4)]">
+                    قراءة التفاصيل
                   </div>
+                </div>
 
-                </CardContent>
-              </Card>
+              </div>
             </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>
@@ -210,13 +216,7 @@ export function CategoriesGrid() {
           {categories.map((cat, idx) => {
             const Icon = cat.icon
             return (
-              <motion.div 
-                key={cat.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.05 }}
-                viewport={{ once: true }}
-              >
+              <motion.div key={cat.name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.05 }} viewport={{ once: true }}>
                 <Card className="bg-[#1a103c]/30 backdrop-blur-sm border-indigo-500/20 hover:border-amber-400/50 hover:bg-[#1a103c]/60 hover:shadow-[0_10px_30px_rgba(251,191,36,0.1)] transition-all duration-300 cursor-pointer text-center group">
                   <CardContent className="p-6 flex flex-col items-center justify-center space-y-4">
                     <div className="p-4 bg-indigo-950/50 rounded-2xl text-indigo-300 group-hover:bg-amber-400/10 group-hover:text-amber-400 group-hover:scale-110 transition-all duration-300 border border-indigo-500/20 group-hover:border-amber-400/30">
@@ -246,13 +246,7 @@ export function NewsletterCTA() {
               انضم إلى أكثر من 10,000 مبدع ومطور. احصل على نشرة أسبوعية تتضمن أحدث وأقوى أدوات الذكاء الاصطناعي مباشرة في بريدك.
             </p>
             <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-              <Input 
-                type="email" 
-                placeholder="أدخل بريدك الإلكتروني السحري..." 
-                className="bg-indigo-950/50 backdrop-blur-md border border-indigo-400/40 text-white h-14 placeholder:text-indigo-300/60 text-right text-base focus-visible:ring-amber-500 rounded-2xl shadow-inner"
-                required
-                dir="rtl"
-              />
+              <Input type="email" placeholder="أدخل بريدك الإلكتروني السحري..." className="bg-indigo-950/50 backdrop-blur-md border border-indigo-400/40 text-white h-14 placeholder:text-indigo-300/60 text-right text-base focus-visible:ring-amber-500 rounded-2xl shadow-inner" required dir="rtl" />
               <Button size="lg" className="h-14 w-full sm:w-auto shrink-0 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold rounded-2xl shadow-lg hover:shadow-amber-500/25 transition-all duration-300">
                 اشترك الآن <ArrowLeft className="mr-2 w-5 h-5" />
               </Button>
