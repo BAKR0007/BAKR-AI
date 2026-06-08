@@ -16,7 +16,8 @@ function LoginForm() {
   // التقاط مسار العودة (إذا كان المستخدم قادماً من مسار محمي سيعود إليه، وإلا سيذهب لـ /dashboard)
   const fallbackUrl = searchParams.get("from") || "/dashboard";
 
-  const handleLogin = async (e: React.FormEvent) => {
+  // 👇 تم التعديل هنا لتحديد نوع الحدث بدقة
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(""); 
     setLoading(true); 

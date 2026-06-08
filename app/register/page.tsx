@@ -12,7 +12,8 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleRegister = async (e: React.FormEvent) => {
+  // 👇 تم التعديل هنا لتحديد نوع الحدث بدقة
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
