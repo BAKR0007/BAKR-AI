@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 1. نظام المستخدمين
+// ==========================================
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  
+  tools     Tool[]   // الأدوات التي أضافها المستخدم
+  favorites Tool[]   @relation("UserFavorites") 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// 2. الجداول الأساسية (الأدوات والتصنيفات)
+// ==========================================
+
+// هذا جدول مخصص لسحب الأدوات من RapidAPI وتخزينها
+model AI_Tool {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String?  @unique
+  description String?  @db.Text
+  url         String   @unique 
+  image_url   String?
+  createdAt   DateTime @default(now())
+}
+
+model Category {
+  id    String @id @default(uuid())
+  name  String @unique
+  slug  String @unique
+  tools Tool[]
+}
+
+model Tool {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String?  @unique
+  description String   @db.Text
+  url         String
+  imageUrl    String?
+  priceModel  String?
+  clicks      Int      @default(0) // عداد النقرات المضاف لتتبع الأداء
+
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  
+  ownerId     String?
+  owner       User?    @relation(fields: [ownerId], references: [id])
+  
+  favoritedBy User[]   @relation("UserFavorites")
+
+  ads         AdCampaign[]
+  affiliate   AffiliateLink?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name, categoryId])
+}
+
+// ==========================================
+// 3. الموديولات الربحية (Monetization)
+// ==========================================
+
+enum AdPosition {
+  HOMEPAGE_HERO
+  CATEGORY_TOP
+  SEARCH_TOP
+}
+
+model AdCampaign {
+  id          String     @id @default(uuid())
+  toolId      String
+  tool        Tool       @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  
+  position    AdPosition
+  cpmBid      Float      @default(0)
+  budget      Float      @default(0)
+  impressions Int        @default(0)
+  clicks      Int        @default(0)
+  isActive    Boolean    @default(true)
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model AffiliateLink {
+  id             String   @id @default(uuid())
+  toolId         String   @unique
+  tool           Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  
+  trackingUrl    String
+  commissionRate Float    @default(0)
+  clicks         Int      @default(0)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
