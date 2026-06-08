@@ -31,9 +31,29 @@ export function HeroSection() {
   return (
     <section className="relative pt-24 pb-16 md:pt-40 md:pb-24 overflow-hidden border-b border-gray-900">
       <div className="container px-4 mx-auto text-center z-10 relative">
+        
+        {/* إضافة الشعار هنا مع تأثير حركة بسيط وهالة ذهبية */}
+        <motion.div 
+          className="flex justify-center mb-8"
+          initial={{ opacity: 0, scale: 0.8 }} 
+          animate={{ opacity: 1, scale: 1 }} 
+          transition={{ duration: 0.5 }}
+        >
+          <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-yellow-500/40 shadow-[0_0_40px_rgba(234,179,8,0.2)] group hover:shadow-[0_0_60px_rgba(234,179,8,0.4)] transition-all duration-300">
+            <Image 
+              src="/logo.png" 
+              alt="BAKR AI Logo" 
+              fill 
+              sizes="(max-width: 768px) 128px, 160px"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              priority // لتسريع تحميل الشعار لأنه أول ما يراه المستخدم
+            />
+          </div>
+        </motion.div>
+
         <motion.h1 
           className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6"
-          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
         >
           مرحباً بك في <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600">BAKR AI</span>
         </motion.h1>
